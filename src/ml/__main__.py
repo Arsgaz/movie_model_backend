@@ -21,6 +21,9 @@ def main() -> None:
     train_parser.add_argument("--output", type=Path, required=True)
     train_parser.add_argument("--evaluation-users", type=int, default=2000)
     train_parser.add_argument("--block-size", type=int, default=128)
+    train_parser.add_argument(
+        "--k", type=int, default=30, help="Ranking cutoff for selection and evaluation (1–100)"
+    )
     analysis_parser = commands.add_parser("analyze")
     analysis_parser.add_argument(
         "--dataset", type=Path, default=PROJECT_ROOT / "data/movielens/prepared-32m-v1"
@@ -94,7 +97,11 @@ def main() -> None:
             from ml.pipeline import train
 
             result = train(
-                args.dataset, args.output, evaluation_users=args.evaluation_users, block_size=args.block_size
+                args.dataset,
+                args.output,
+                evaluation_users=args.evaluation_users,
+                block_size=args.block_size,
+                k=args.k,
             )
         else:
             from ml.model import ItemModel

@@ -43,7 +43,7 @@ docker compose up --build -d --wait
 
 ## Запуск с моделью
 
-Подготовьте совместимый каталог артефакта с manifest.json, movies.json, similarities.npz и popularity.npy. Для текущей версии он находится в artifacts/recommendations/movielens-32m-v1/model. Обучение описано в [документации ML](machine-learning.md).
+Подготовьте совместимый каталог артефакта с manifest.json, movies.json, similarities.npz и popularity.npy. Для текущей версии он находится в artifacts/recommendations/movielens-32m-top30-v1/model. Обучение описано в [документации ML](machine-learning.md).
 
 ```sh
 docker compose -f compose.yaml -f compose.model.yaml up --build -d --wait

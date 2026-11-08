@@ -4,7 +4,7 @@ services:
       MOVIE_RECOMMENDATION_MODEL_PATH: /models/active
     volumes:
       - type: bind
-        source: ${MOVIE_MODEL_HOST_PATH:-./artifacts/recommendations/movielens-32m-v1/model}
+        source: ${MOVIE_MODEL_HOST_PATH:-./artifacts/recommendations/movielens-32m-top30-v1/model}
         target: /models/active
         read_only: true
         bind:

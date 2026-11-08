@@ -13,9 +13,11 @@ from ml.evaluation import chronological_split, evaluate
 from ml.model import ItemModel, Parameters
 
 
-def train(dataset_path: Path, output: Path, *, evaluation_users: int = 2000, block_size: int = 128) -> dict:
-    if evaluation_users < 1 or block_size < 1:
-        raise ValueError("Evaluation user limit and block size must be positive")
+def train(
+    dataset_path: Path, output: Path, *, evaluation_users: int = 2000, block_size: int = 128, k: int = 30
+) -> dict:
+    if evaluation_users < 1 or block_size < 1 or not 1 <= k <= 100:
+        raise ValueError("Use positive user and block limits and k between 1 and 100")
     if output.exists():
         raise ValueError("Output already exists; choose a new run directory")
     dataset = load_dataset(dataset_path)
@@ -29,9 +31,9 @@ def train(dataset_path: Path, output: Path, *, evaluation_users: int = 2000, blo
             from ml.large_evaluation import evaluate_large
 
             return evaluate_large(
-                model, history, targets, dataset.films, strategy=strategy, max_users=evaluation_users
+                model, history, targets, dataset.films, strategy=strategy, max_users=evaluation_users, k=k
             )
-        return evaluate(model, history, targets, dataset.films, strategy=strategy)
+        return evaluate(model, history, targets, dataset.films, strategy=strategy, k=k)
 
     def fit(rows, parameters):
         print(f"Fitting {len(rows):,} ratings: {asdict(parameters)}", flush=True)
@@ -63,16 +65,17 @@ def train(dataset_path: Path, output: Path, *, evaluation_users: int = 2000, blo
     else:
         grid = [Parameters(neighbors=n, shrinkage=s) for n in (40, 80) for s in (10.0, 50.0)]
         models = [fit(train_rows, parameters) for parameters in grid]
+    metric = f"ndcg@{k}"
     trials = []
     for parameters, model in zip(grid, models, strict=True):
         metrics = measure(model, train_rows, validation)
-        print(f"Validation {parameters.neighbors} neighbors: {metrics['ndcg@10']}", flush=True)
+        print(f"Validation {parameters.neighbors} neighbors: {metrics[metric]}", flush=True)
         trials.append({"parameters": asdict(parameters), "metrics": metrics})
     baseline = measure(models[0], train_rows, validation, strategy="popularity")
     if baseline["evaluated_users"] == 0:
         raise ValueError("No validation users with history; model selection is impossible")
-    best = max(range(len(trials)), key=lambda i: trials[i]["metrics"]["ndcg@10"])
-    selected = "item_knn" if trials[best]["metrics"]["ndcg@10"] > baseline["ndcg@10"] else "popularity"
+    best = max(range(len(trials)), key=lambda i: trials[i]["metrics"][metric])
+    selected = "item_knn" if trials[best]["metrics"][metric] > baseline[metric] else "popularity"
     parameters = grid[best]
     # Freeze hyperparameters before accessing test. Test model may now use validation history.
     train_validation = (
@@ -85,16 +88,14 @@ def train(dataset_path: Path, output: Path, *, evaluation_users: int = 2000, blo
     test_model = fit(train_validation, parameters)
     test_baseline = measure(test_model, train_validation, test, strategy="popularity")
     test_selected = measure(test_model, train_validation, test, strategy=selected)
-    print(
-        f"Test NDCG: selected={test_selected['ndcg@10']}, popularity={test_baseline['ndcg@10']}", flush=True
-    )
+    print(f"Test NDCG: selected={test_selected[metric]}, popularity={test_baseline[metric]}", flush=True)
     if not test_selected["evaluated_users"]:
         raise ValueError("No test users with history")
     report = {
         "protocol": "global_temporal_70_15_15",
-        "k": 10,
+        "k": k,
         "relevant_rating_min": 4,
-        "selection_metric": "validation_ndcg@10",
+        "selection_metric": f"validation_ndcg@{k}",
         "evaluation_user_limit": evaluation_users if large else None,
         "cooccurrence_block_size": block_size,
         "selected_strategy": selected,
@@ -143,9 +144,9 @@ def train(dataset_path: Path, output: Path, *, evaluation_users: int = 2000, blo
         {
             "model_version": output.name,
             "strategy": selected,
-            "validation_ndcg@10": trials[best]["metrics"]["ndcg@10"]
+            f"validation_ndcg@{k}": trials[best]["metrics"][metric]
             if selected == "item_knn"
-            else baseline["ndcg@10"],
+            else baseline[metric],
             "test": report["test"],
             "movies": len(final.films),
             "ratings": len(dataset.ratings),

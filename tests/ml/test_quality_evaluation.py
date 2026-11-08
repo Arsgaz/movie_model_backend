@@ -101,7 +101,8 @@ def test_incomplete_or_duplicate_user_pairs_are_not_silently_bootstrapped():
     assert summarize_pairs([], resamples=100, seed=1)["metrics"] == {}
 
 
-def test_full_replay_matches_frozen_experiment_and_keeps_source_artifacts(tmp_path, monkeypatch):
+@pytest.mark.parametrize("k", [10, 30])
+def test_full_replay_matches_frozen_experiment_and_keeps_source_artifacts(tmp_path, monkeypatch, k):
     pytest.importorskip("matplotlib")
     import ml.pipeline as pipeline
     import ml.quality_evaluation as quality
@@ -119,7 +120,7 @@ def test_full_replay_matches_frozen_experiment_and_keeps_source_artifacts(tmp_pa
     monkeypatch.setattr(pipeline, "load_dataset", lambda _path: dataset)
     monkeypatch.setattr(quality, "load_dataset", lambda _path: dataset)
     run = tmp_path / "run"
-    pipeline.train(source, run, evaluation_users=3, block_size=2)
+    pipeline.train(source, run, evaluation_users=3, block_size=2, k=k)
     before = {str(path.relative_to(run)): digest(path) for path in run.rglob("*") if path.is_file()}
     output = tmp_path / "assessment"
     result = assess(source, run, output, resamples=100, block_size=2)
@@ -127,7 +128,7 @@ def test_full_replay_matches_frozen_experiment_and_keeps_source_artifacts(tmp_pa
     assert result["overall"]["users"] == 3
     for metric in ("precision", "recall", "ndcg"):
         assert result["overall"]["metrics"][metric]["selected"]["mean"] == pytest.approx(
-            frozen["test"]["selected"][f"{metric}@10"]
+            frozen["test"]["selected"][f"{metric}@{k}"]
         )
     assert len(list(output.glob("*.png"))) == len(list(output.glob("*.svg"))) == 4
     manifest = json.loads((output / "manifest.json").read_text())

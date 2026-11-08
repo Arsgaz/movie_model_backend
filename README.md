@@ -68,10 +68,10 @@ curl http://127.0.0.1:8000/api/v1/profiles
 python -m pip install -c requirements.lock -e ".[dev,ml]"
 python -m ml download --source 32m
 python -m ml prepare --source 32m
-python -m ml train --output artifacts/recommendations/movielens-32m-v1 --evaluation-users 2000
+python -m ml train --output artifacts/recommendations/movielens-32m-top30-v1 --evaluation-users 2000
 ```
 
-ML-артефакт необязателен: без него сервис использует подбор по содержанию и популярности TMDB. Для подключения совместимого артефакта укажите `MOVIE_RECOMMENDATION_MODEL_PATH=artifacts/recommendations/movielens-32m-v1/model` в `.env` и перезапустите сервис. `GET /api/v1/profiles/{profile_id}/recommendations?limit=10` вернёт фильмы по оценкам профиля, без уже оценённых. Для профиля без подходящей истории используется явно обозначенная популярная подборка. Новые фильмы могут попасть в выдачу через TMDB независимо от каталога ML-модели. Сериалы не участвуют в ML.
+ML-артефакт необязателен: без него сервис использует подбор по содержанию и популярности TMDB. Для подключения совместимого артефакта укажите `MOVIE_RECOMMENDATION_MODEL_PATH=artifacts/recommendations/movielens-32m-top30-v1/model` в `.env` и перезапустите сервис. `GET /api/v1/profiles/{profile_id}/recommendations?limit=10` вернёт фильмы по оценкам профиля, без уже оценённых. Для профиля без подходящей истории используется явно обозначенная популярная подборка. Новые фильмы могут попасть в выдачу через TMDB независимо от каталога ML-модели. Сериалы не участвуют в ML.
 
 Результаты сравнения алгоритмов и артефакты сохраняются в `artifacts/`, а не в рабочую БД. Подробности: [гибридный сервис](docs/recommendations.md), [обучение и протокол оценки](docs/machine-learning.md).
 
@@ -92,8 +92,8 @@ python -m ml analyze --output artifacts/analysis/movielens-32m-eda-v1
 
 ```sh
 python -m ml assess \
-  --training-run artifacts/recommendations/movielens-32m-v1 \
-  --output artifacts/evaluation/movielens-32m-quality-v1
+  --training-run artifacts/recommendations/movielens-32m-top30-v1 \
+  --output artifacts/evaluation/movielens-32m-top30-quality-v1
 ```
 
 Требуются extra ml и analysis. Рабочий артефакт не изменяется. Методика: [расширенная оценка модели](docs/model-evaluation.md).

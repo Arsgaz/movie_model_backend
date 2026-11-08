@@ -8,8 +8,8 @@
 python -m pip install -c requirements.lock -e ".[dev,ml,analysis]"
 python -m ml assess \
   --dataset data/movielens/prepared-32m-v1 \
-  --training-run artifacts/recommendations/movielens-32m-v1 \
-  --output artifacts/evaluation/movielens-32m-quality-v1 \
+  --training-run artifacts/recommendations/movielens-32m-top30-v1 \
+  --output artifacts/evaluation/movielens-32m-top30-quality-v1 \
   --resamples 2000 --bootstrap-seed 2026
 ```
 
