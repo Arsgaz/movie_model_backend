@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "movie-model-backend"
+version = "0.1.0"
+description = "Movie recommendation service API"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.34,<1",
+    "pydantic-settings>=2.8,<3",
+    "sqlalchemy[asyncio]>=2.0.38,<2.1",
+    "aiosqlite>=0.21,<1",
+    "alembic>=1.15,<2",
+    "dishka>=1.6,<2",
+    "httpx2>=2.13,<3",
+]
+
+[project.optional-dependencies]
+analysis = ["matplotlib>=3.10,<4"]
+ml = ["numpy>=2.2,<3", "scipy>=1.15,<2"]
+dev = ["pytest>=8.3,<10", "pytest-asyncio>=1,<2", "ruff>=0.12,<1"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]

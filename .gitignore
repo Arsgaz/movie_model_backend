@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+artifacts/
+.DS_Store
+
+*.egg-info/
+build/
+dist/
+.coverage
+htmlcov/
+
+# Offline datasets and prepared copies (never imported into the application DB).
+data/movielens/

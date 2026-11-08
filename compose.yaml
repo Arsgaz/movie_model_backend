@@ -1,0 +1,30 @@
+name: movie-model
+
+services:
+  backend:
+    build: .
+    env_file: .env
+    environment:
+      MOVIE_DATABASE_URL: sqlite+aiosqlite:////app/data/movie_model.sqlite3
+      MOVIE_RECOMMENDATION_MODEL_PATH: ""
+      MOVIE_CORS_ORIGINS: '["http://localhost:${MOVIE_WEB_PORT:-8080}","http://127.0.0.1:${MOVIE_WEB_PORT:-8080}"]'
+    ports:
+      - "127.0.0.1:${MOVIE_API_PORT:-8081}:8000"
+    volumes:
+      - movie-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ${MOVIE_FRONTEND_PATH:-../movie_model_frontend}
+    environment:
+      BACKEND_API_URL: http://backend:8000
+    ports:
+      - "127.0.0.1:${MOVIE_WEB_PORT:-8080}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  movie-data:

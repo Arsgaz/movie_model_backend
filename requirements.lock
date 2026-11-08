@@ -1,0 +1,51 @@
+# Pinned runtime and development dependencies.
+# Install: python -m pip install -c requirements.lock -e ".[dev]"
+aiosqlite==0.22.1
+alembic==1.20.1
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.16.0
+certifi==2026.10.23
+click==8.5.1
+dishka==1.10.1
+fastapi==0.162.2
+greenlet==3.5.6
+h11==0.16.0
+httpcore2==2.16.0
+httpx2==2.16.0
+idna==3.20
+iniconfig==2.3.1
+Mako==1.4.3
+MarkupSafe==3.0.4
+opentelemetry-api==1.45.2
+packaging==26.3
+pluggy==1.7.0
+pydantic==2.14.3
+pydantic-settings==2.16.2
+pydantic_core==2.50.4
+Pygments==2.21.0
+pytest==9.2.0
+pytest-asyncio==1.4.1.post1
+python-dotenv==1.2.4
+ruff==0.17.4
+SQLAlchemy==2.0.57
+starlette==1.10.0
+truststore==0.10.5
+typing-inspection==0.4.5
+typing_extensions==4.16.0
+uvicorn==0.54.0
+
+# Optional offline ML dependencies (ml extra).
+numpy==2.5.4
+scipy==1.18.1
+
+# Optional dataset analysis and plotting dependencies (analysis extra).
+matplotlib==3.11.2
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.68.0
+kiwisolver==1.5.1
+pillow==13.0.0
+pyparsing==3.3.3
+python-dateutil==4.0.0
+tzdata==2026.6
